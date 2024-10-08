@@ -247,10 +247,18 @@ class VideoCompressor {
     func exportVideoHelper(url: URL,asset: AVAsset, bitRate: Int,resultWidth:Float,resultHeight:Float,uuid:String,progressDivider: Int, onProgress: @escaping (Float) -> Void,  onCompletion: @escaping (URL) -> Void, onFailure: @escaping (Error) -> Void){
         var currentVideoCompression:Int=0
 
-        var tmpURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
-          .appendingPathComponent(ProcessInfo().globallyUniqueString)
-          .appendingPathExtension("mp4")
-        tmpURL = URL(string: Utils.makeValidUri(filePath: tmpURL.absoluteString))!
+        let filename = "compressed.mp4"
+        let tmpURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+          .appendingPathComponent(filename)
+
+        if FileManager.default.fileExists(atPath: tmpURL.path) {
+            // delete file
+            do {
+                try FileManager.default.removeItem(atPath: tmpURL.path)
+            } catch {
+                print("Could not delete file, probably read-only filesystem")
+            }
+        }
 
         let exporter = NextLevelSessionExporter(withAsset: asset)
         exporter.outputURL = tmpURL
